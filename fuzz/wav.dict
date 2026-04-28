@@ -1,0 +1,60 @@
+# AFL dictionary for the WAV/RIFF format.
+#
+# AFL injects these tokens at random offsets, dramatically improving
+# the rate at which the fuzzer reaches well-formed chunk-handling code
+# paths (which it would otherwise have to discover by random byte flips).
+#
+# Sources: Microsoft RIFF spec + IBM/Microsoft Multimedia Programming
+# Interface and Data Specifications 1.0.
+
+# Container magic
+"RIFF"
+"WAVE"
+"RIFX"
+"LIST"
+
+# Standard chunks our parser understands or skips
+"fmt "
+"data"
+"fact"
+"INFO"
+"INAM"
+"IART"
+"ICRD"
+"ISFT"
+"ICMT"
+"cue "
+"plst"
+"smpl"
+"inst"
+"bext"
+
+# WAVE_FORMAT_* codes (little-endian uint16)
+fmt_pcm="\x01\x00"
+fmt_float="\x03\x00"
+fmt_alaw="\x06\x00"
+fmt_mulaw="\x07\x00"
+fmt_extensible="\xfe\xff"
+
+# Common channel counts
+ch_mono="\x01\x00"
+ch_stereo="\x02\x00"
+ch_5_1="\x06\x00"
+
+# Common sample rates (LE uint32)
+rate_8k="\x40\x1f\x00\x00"
+rate_16k="\x80\x3e\x00\x00"
+rate_22k05="\x22\x56\x00\x00"
+rate_44k1="\x44\xac\x00\x00"
+rate_48k="\x80\xbb\x00\x00"
+
+# Common bit depths
+bits_8="\x08\x00"
+bits_16="\x10\x00"
+bits_24="\x18\x00"
+bits_32="\x20\x00"
+
+# Powers of two that frequently appear as chunk sizes
+sz_16="\x10\x00\x00\x00"
+sz_18="\x12\x00\x00\x00"
+sz_40="\x28\x00\x00\x00"

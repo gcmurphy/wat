@@ -1,0 +1,4 @@
+build/
+fuzz/findings/
+fuzz/seeds/
+*.o
