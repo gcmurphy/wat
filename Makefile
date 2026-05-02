@@ -19,6 +19,12 @@ CC      ?= gcc
 COMMON_CPPFLAGS = -D_POSIX_C_SOURCE=200809L -D_DEFAULT_SOURCE \
                   -I$(INC_DIR) -I$(VENDOR_DIR)
 
+# macOS hides BSD extensions (mkstemps, etc.) under strict _POSIX_C_SOURCE;
+# _DARWIN_C_SOURCE re-exposes them. No-op on Linux.
+ifeq ($(UNAME_S),Darwin)
+  COMMON_CPPFLAGS += -D_DARWIN_C_SOURCE
+endif
+
 # Production build (also shared with the in-tree test build).
 CFLAGS  ?= -O2 -Wall -Wextra -Wshadow -Wpointer-arith -Wcast-align \
            -Wstrict-prototypes -Wmissing-prototypes \
