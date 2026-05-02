@@ -38,18 +38,26 @@ WHISPER_A   = $(WBUILD)/src/libwhisper.a
 GGML_A      = $(WBUILD)/ggml/src/libggml.a
 GGML_BASE   = $(WBUILD)/ggml/src/libggml-base.a
 GGML_CPU    = $(WBUILD)/ggml/src/libggml-cpu.a
-WLIBS       = $(WHISPER_A) $(GGML_A) $(GGML_CPU) $(GGML_BASE)
 
 # Platform link flags
 ifeq ($(UNAME_S),Darwin)
+  # whisper.cpp auto-enables Metal + BLAS backends on macOS; libggml.a's
+  # backend registry references their _reg symbols, so these archives must
+  # appear AFTER libggml.a on the link line.
+  GGML_METAL      = $(WBUILD)/ggml/src/ggml-metal/libggml-metal.a
+  GGML_BLAS       = $(WBUILD)/ggml/src/ggml-blas/libggml-blas.a
+  GGML_BACKENDS   = $(GGML_METAL) $(GGML_BLAS)
   CXX_STDLIB      = -lc++
   PLATFORM_LDLIBS = -framework CoreAudio -framework AudioToolbox \
-                    -framework CoreFoundation -framework Accelerate
+                    -framework CoreFoundation -framework Accelerate \
+                    -framework Foundation -framework Metal -framework MetalKit
 else
+  GGML_BACKENDS   =
   CXX_STDLIB      = -lstdc++
   PLATFORM_LDLIBS = -ldl -lgomp
 endif
 
+WLIBS   = $(WHISPER_A) $(GGML_A) $(GGML_CPU) $(GGML_BASE) $(GGML_BACKENDS)
 LDLIBS  = $(WLIBS) $(PLATFORM_LDLIBS) -lm -lpthread $(CXX_STDLIB)
 NPROC  := $(shell nproc 2>/dev/null || sysctl -n hw.ncpu 2>/dev/null || echo 4)
 
